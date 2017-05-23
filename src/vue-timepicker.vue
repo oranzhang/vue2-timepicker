@@ -71,8 +71,7 @@ export default {
     secondInterval (newInteval) {
       this.renderList('second', newInteval)
     },
-    'value': 'readValues',
-    'displayTime': 'fillValues'
+    'value': 'onValueChange'
   },
 
   methods: {
@@ -131,7 +130,7 @@ export default {
 
       const self = this
       this.$nextTick(() => {
-        self.readValues()
+        self.initRender()
       })
     },
 
@@ -210,8 +209,6 @@ export default {
       if (values.indexOf(this.apmType) > -1) {
         this.apm = timeValue[this.apmType]
       }
-
-      this.fillValues()
     },
 
     fillValues () {
@@ -314,8 +311,7 @@ export default {
       }
 
       this.fullValues = fullValues
-      this.updateTimeValue(fullValues)
-      this.$emit('change', {data: fullValues})
+      return fullValues
     },
 
     updateTimeValue (fullValues) {
@@ -355,6 +351,9 @@ export default {
       } else if (type === 'apm') {
         this.apm = value
       }
+      this.$nextTick(() => {
+        this.onSelect()
+      })
     },
 
     clearTime () {
@@ -362,6 +361,31 @@ export default {
       this.minute = ''
       this.second = ''
       this.apm = ''
+    },
+
+    initRender () {
+      (async () => {
+        await this.readValues()
+        await this.fillValues()
+      })()
+    },
+
+    //    this.updateTimeValue(fullValues)
+    //    this.$emit('change', {data: fullValues})
+
+    onValueChange () {
+      (async () => {
+        await this.readValues()
+        await this.fillValues()
+      })()
+    },
+
+    onSelect () {
+      (async () => {
+        const fullValues = await this.fillValues()
+        this.updateTimeValue(fullValues)
+        this.$emit('change', {data: fullValues})
+      })()
     }
   },
 
